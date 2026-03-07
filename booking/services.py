@@ -5,6 +5,7 @@ Contains business logic for booking flow.
 """
 
 from django.db import transaction
+from django.core.exceptions import ValidationError
 
 from booking.models import Booking, Ticket
 from schedule.models import Performance
@@ -13,12 +14,6 @@ from schedule.models import Performance
 def create_booking(*, user) -> Booking:
     """
     Create a new booking (cart) for user.
-
-    Args:
-        user: User instance.
-
-    Returns:
-        Created Booking instance.
     """
     return Booking.objects.create(user=user)
 
@@ -33,21 +28,20 @@ def add_ticket_to_booking(
 ) -> Ticket:
     """
     Add ticket to booking with seat locking.
-
-    Args:
-        booking: Booking instance.
-        performance: Performance instance.
-        row: Seat row.
-        seat: Seat number.
-
-    Returns:
-        Created Ticket instance.
     """
-    Ticket.objects.select_for_update().filter(
-        performance=performance,
-        row=row,
-        seat=seat,
+    existing_ticket = (
+        Ticket.objects
+        .select_for_update()
+        .filter(
+            performance=performance,
+            row=row,
+            seat=seat,
+        )
+        .first()
     )
+
+    if existing_ticket:
+        raise ValidationError("Seat is already booked.")
 
     return Ticket.objects.create(
         booking=booking,
@@ -60,13 +54,7 @@ def add_ticket_to_booking(
 @transaction.atomic
 def confirm_booking(*, booking: Booking) -> Booking:
     """
-    Confirm booking and lock tickets.
-
-    Args:
-        booking: Booking instance.
-
-    Returns:
-        Confirmed Booking instance.
+    Confirm booking.
     """
     booking.is_confirmed = True
     booking.save(update_fields=("is_confirmed",))
