@@ -4,8 +4,8 @@ Service layer for booking domain.
 Contains business logic for booking flow.
 """
 
-from django.db import transaction
-from django.core.exceptions import ValidationError
+from django.db import transaction, IntegrityError
+from rest_framework.exceptions import ValidationError
 
 from booking.models import Booking, Ticket
 from schedule.models import Performance
@@ -27,28 +27,22 @@ def add_ticket_to_booking(
     seat: int,
 ) -> Ticket:
     """
-    Add ticket to booking with seat locking.
+    Add ticket to booking.
+
+    Protected by DB-level unique constraint.
     """
-    existing_ticket = (
-        Ticket.objects
-        .select_for_update()
-        .filter(
+    if booking.is_confirmed:
+        raise ValidationError("Cannot modify confirmed booking.")
+
+    try:
+        return Ticket.objects.create(
+            booking=booking,
             performance=performance,
             row=row,
             seat=seat,
         )
-        .first()
-    )
-
-    if existing_ticket:
+    except IntegrityError:
         raise ValidationError("Seat is already booked.")
-
-    return Ticket.objects.create(
-        booking=booking,
-        performance=performance,
-        row=row,
-        seat=seat,
-    )
 
 
 @transaction.atomic
@@ -56,6 +50,9 @@ def confirm_booking(*, booking: Booking) -> Booking:
     """
     Confirm booking.
     """
+    if booking.is_confirmed:
+        raise ValidationError("Booking is already confirmed.")
+
     booking.is_confirmed = True
     booking.save(update_fields=("is_confirmed",))
     return booking
