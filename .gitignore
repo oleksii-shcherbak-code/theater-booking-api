@@ -18,4 +18,3 @@ db.sqlite3
 
 # Migrations
 */migrations/__pycache__/
-*/migrations/*.py
