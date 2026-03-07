@@ -1,35 +1,21 @@
-"""
-Models for booking domain.
-
-Contains booking and ticket entities.
-"""
-
 from django.conf import settings
 from django.db import models
 
 
 class Booking(models.Model):
-    """
-    Booking (cart/order) model.
-    """
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="bookings",
     )
-    created_at = models.DateTimeField(auto_now_add=True)
     is_confirmed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self) -> str:
-        return f"Booking #{self.id} for {self.user}"
+    def __str__(self):
+        return f"Booking #{self.pk}"
 
 
 class Ticket(models.Model):
-    """
-    Ticket model representing a seat for a performance.
-    """
-
     booking = models.ForeignKey(
         Booking,
         on_delete=models.CASCADE,
@@ -47,9 +33,9 @@ class Ticket(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=("performance", "row", "seat"),
-                name="unique_ticket_per_seat",
+                name="unique_seat_per_performance",
             )
         ]
 
-    def __str__(self) -> str:
+    def __str__(self):
         return f"{self.performance} row {self.row} seat {self.seat}"
