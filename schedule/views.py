@@ -3,6 +3,7 @@ API views for schedule domain.
 """
 
 from rest_framework import viewsets
+from rest_framework.permissions import IsAdminUser
 
 from schedule.models import Performance
 from schedule.selectors import performance_list
@@ -32,3 +33,12 @@ class PerformanceViewSet(viewsets.ModelViewSet):
         if self.action in ("list", "retrieve"):
             return PerformanceListSerializer
         return PerformanceCreateSerializer
+
+    def get_permissions(self):
+        """
+        Allow read-only access for everyone,
+        write access only for admin users.
+        """
+        if self.action in ("list", "retrieve"):
+            return []
+        return [IsAdminUser()]

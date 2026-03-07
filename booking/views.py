@@ -4,9 +4,10 @@ API views for booking domain.
 
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from booking.models import Booking
+from booking.permissions import IsOwnerOrAdmin
 from booking.selectors import booking_list_for_user
 from booking.serializers import (
     AddTicketSerializer,
@@ -22,6 +23,7 @@ class BookingViewSet(viewsets.ModelViewSet):
     """
 
     serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
 
     def get_queryset(self):
         """
@@ -33,7 +35,8 @@ class BookingViewSet(viewsets.ModelViewSet):
         """
         Create booking for current user.
         """
-        serializer.instance = create_booking(user=self.request.user)
+        booking = create_booking(user=self.request.user)
+        serializer.instance = booking
 
     @action(detail=True, methods=["post"])
     def add_ticket(self, request, pk=None):

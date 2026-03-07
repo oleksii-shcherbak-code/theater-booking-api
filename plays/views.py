@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.permissions import IsAdminUser
 
 from plays.models import Play
 from plays.selectors import play_list
@@ -21,3 +22,12 @@ class PlayViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return PlayDetailSerializer
         return PlayCreateUpdateSerializer
+
+    def get_permissions(self):
+        """
+        Allow read-only access for everyone,
+        write access only for admin users.
+        """
+        if self.action in ["list", "retrieve"]:
+            return []
+        return [IsAdminUser()]
