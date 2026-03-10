@@ -1,4 +1,5 @@
 from django.urls import path
+
 from users.auth_views import LoginView, RefreshView
 
 urlpatterns = [

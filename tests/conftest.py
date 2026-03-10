@@ -1,10 +1,10 @@
 import pytest
-from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
+from rest_framework.test import APIClient
 
-from plays.models import Play, Genre, Actor
-from schedule.models import TheatreHall, Performance
 from booking.models import Booking
+from plays.models import Actor, Genre, Play
+from schedule.models import Performance, TheatreHall
 
 User = get_user_model()
 

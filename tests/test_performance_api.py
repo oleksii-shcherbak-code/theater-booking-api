@@ -1,5 +1,4 @@
 import pytest
-from schedule.models import Performance
 
 
 @pytest.mark.django_db

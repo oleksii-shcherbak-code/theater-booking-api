@@ -1,5 +1,4 @@
 import pytest
-from plays.models import Play
 
 
 @pytest.mark.django_db

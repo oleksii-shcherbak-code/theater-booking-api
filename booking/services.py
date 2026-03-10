@@ -4,7 +4,7 @@ Service layer for booking domain.
 Contains business logic for booking flow.
 """
 
-from django.db import transaction, IntegrityError
+from django.db import IntegrityError, transaction
 from rest_framework.exceptions import ValidationError
 
 from booking.models import Booking, Ticket

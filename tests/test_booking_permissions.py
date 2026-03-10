@@ -1,4 +1,5 @@
 import pytest
+
 from booking.models import Booking
 
 

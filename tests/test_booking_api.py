@@ -1,5 +1,6 @@
 import pytest
-from booking.models import Booking, Ticket
+
+from booking.models import Booking
 
 
 @pytest.mark.django_db
