@@ -37,13 +37,17 @@ class PlayDetailSerializer(serializers.ModelSerializer):
 class PlayCreateUpdateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=255)
     description = serializers.CharField()
+
     genre_ids = serializers.PrimaryKeyRelatedField(
         queryset=Genre.objects.all(),
         many=True,
+        write_only=True,
     )
+
     actor_ids = serializers.PrimaryKeyRelatedField(
         queryset=Actor.objects.all(),
         many=True,
+        write_only=True,
     )
 
     def create(self, validated_data):
