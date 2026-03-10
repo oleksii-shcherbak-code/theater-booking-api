@@ -8,6 +8,7 @@ urlpatterns = [
     path("api/users/", include("users.urls")),
     path("api/auth/", include("users.auth_urls")),
 
+    path("api/", include("plays.urls")),      # ← ЭТА СТРОКА ОБЯЗАТЕЛЬНО
     path("api/", include("booking.urls")),
 
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
