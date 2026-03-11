@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.db.models import Count, Sum, F
+from django.db.models import Count, F, Sum
 from django.utils.translation import gettext_lazy as _
 
 from booking.models import Booking, Ticket
