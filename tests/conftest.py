@@ -1,3 +1,6 @@
+"""
+Test fixtures and helpers for API tests.
+"""
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -73,3 +76,15 @@ def performance(db, play, theatre_hall):
 @pytest.fixture
 def booking(db, user):
     return Booking.objects.create(user=user)
+
+
+@pytest.fixture
+def extract_results():
+    """
+    Return a callable that extracts list of items from a response, handling paginated responses.
+    """
+    def _extract(response):
+        if isinstance(response.data, dict) and "results" in response.data:
+            return response.data["results"]
+        return response.data
+    return _extract
