@@ -1,8 +1,8 @@
+from datetime import datetime
 from rest_framework import serializers
-
-from plays.models import Play
 from schedule.models import Performance, TheatreHall
-from schedule.services import create_performance
+from plays.models import Play
+from django.utils import timezone
 
 
 class TheatreHallSerializer(serializers.ModelSerializer):
@@ -12,34 +12,22 @@ class TheatreHallSerializer(serializers.ModelSerializer):
 
 
 class PerformanceListSerializer(serializers.ModelSerializer):
-    play = serializers.StringRelatedField()
     theatre_hall = TheatreHallSerializer()
+    play = serializers.PrimaryKeyRelatedField(queryset=Play.objects.all())
 
     class Meta:
         model = Performance
-        fields = (
-            "id",
-            "play",
-            "theatre_hall",
-            "starts_at",
-            "ticket_price",
-        )
+        fields = ("id", "play", "theatre_hall", "starts_at", "ticket_price")
 
 
-class PerformanceCreateSerializer(serializers.Serializer):
-    play_id = serializers.PrimaryKeyRelatedField(
-        queryset=Play.objects.all(),
-    )
-    theatre_hall_id = serializers.PrimaryKeyRelatedField(
-        queryset=TheatreHall.objects.all(),
-    )
-    starts_at = serializers.DateTimeField()
-    ticket_price = serializers.DecimalField(max_digits=8, decimal_places=2)
+class PerformanceCreateSerializer(serializers.ModelSerializer):
+    play = serializers.PrimaryKeyRelatedField(queryset=Play.objects.all())
 
-    def create(self, validated_data):
-        return create_performance(
-            play=validated_data["play_id"],
-            theatre_hall=validated_data["theatre_hall_id"],
-            starts_at=validated_data["starts_at"],
-            ticket_price=validated_data["ticket_price"],
-        )
+    class Meta:
+        model = Performance
+        fields = ("id", "play", "theatre_hall", "starts_at", "ticket_price")
+
+    def validate_starts_at(self, value: datetime) -> datetime:  # noqa
+        if value < timezone.now():
+            raise serializers.ValidationError("starts_at cannot be in the past.")
+        return value

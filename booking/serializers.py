@@ -1,18 +1,47 @@
-"""
-Serializers for booking domain.
-"""
-
+from typing import Any, Dict, Optional
 from rest_framework import serializers
-
 from booking.models import Booking, Ticket
-from booking.services import add_ticket_to_booking, confirm_booking
 from schedule.models import Performance
+from django.utils import timezone
 
 
 class TicketSerializer(serializers.ModelSerializer):
+    """
+    Use 'performance' field name because PrimaryKeyRelatedField returns an object.
+    """
+    performance = serializers.PrimaryKeyRelatedField(
+        queryset=Performance.objects.all(),
+    )
+
     class Meta:
         model = Ticket
         fields = ("id", "performance", "row", "seat")
+
+    def validate_row(self, value: int) -> int:  # noqa
+        if value < 1:
+            raise serializers.ValidationError("Row must be greater than 0.")
+        return value
+
+    def validate_seat(self, value: int) -> int:  # noqa
+        if value < 1:
+            raise serializers.ValidationError("Seat must be greater than 0.")
+        return value
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        performance: Optional[Performance] = attrs.get("performance") or getattr(self.instance, "performance", None)
+        if performance:
+            starts_at = getattr(performance, "starts_at", None)
+            if starts_at and starts_at < timezone.now():
+                raise serializers.ValidationError("Cannot create ticket for past performance.")
+            theatre_hall = getattr(performance, "theatre_hall", None)
+            if theatre_hall:
+                row = attrs.get("row") or getattr(self.instance, "row", None)
+                seat = attrs.get("seat") or getattr(self.instance, "seat", None)
+                if row and row > theatre_hall.rows:
+                    raise serializers.ValidationError({"row": "Row is out of theatre hall bounds."})
+                if seat and seat > theatre_hall.seats_per_row:
+                    raise serializers.ValidationError({"seat": "Seat is out of theatre hall bounds."})
+        return attrs
 
 
 class BookingSerializer(serializers.ModelSerializer):
@@ -20,27 +49,5 @@ class BookingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Booking
-        fields = ("id", "created_at", "is_confirmed", "tickets")
-
-
-class AddTicketSerializer(serializers.Serializer):
-    performance_id = serializers.PrimaryKeyRelatedField(
-        queryset=Performance.objects.all(),
-    )
-    row = serializers.IntegerField(min_value=1)
-    seat = serializers.IntegerField(min_value=1)
-
-    def create(self, validated_data):
-        booking = self.context["booking"]
-        return add_ticket_to_booking(
-            booking=booking,
-            performance=validated_data["performance_id"],
-            row=validated_data["row"],
-            seat=validated_data["seat"],
-        )
-
-
-class ConfirmBookingSerializer(serializers.Serializer):
-    def save(self, **kwargs):
-        booking = self.context["booking"]
-        return confirm_booking(booking=booking)
+        fields = ("id", "user", "is_confirmed", "created_at", "tickets")
+        read_only_fields = ("is_confirmed", "created_at")
