@@ -1,7 +1,9 @@
-from django.db import transaction
 import logging
-from plays.models import Play
 from typing import Iterable
+
+from django.db import transaction
+
+from plays.models import Play
 
 logger = logging.getLogger(__name__)
 

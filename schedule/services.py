@@ -1,9 +1,11 @@
-from django.db import transaction
 import logging
-from schedule.models import Performance, TheatreHall
-from plays.models import Play
+
+from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
+
+from plays.models import Play
+from schedule.models import Performance, TheatreHall
 
 logger = logging.getLogger(__name__)
 

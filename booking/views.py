@@ -1,12 +1,13 @@
-from rest_framework import viewsets, status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import ValidationError
-from booking.serializers import BookingSerializer, TicketSerializer
-from booking.services import create_booking, add_ticket_to_booking, confirm_booking
+
 from booking.models import Booking
+from booking.serializers import BookingSerializer, TicketSerializer
+from booking.services import add_ticket_to_booking, confirm_booking, create_booking
 from schedule.models import Performance
 
 

@@ -1,6 +1,8 @@
-from django.db import transaction, IntegrityError
 import logging
+
+from django.db import IntegrityError, transaction
 from rest_framework.exceptions import ValidationError
+
 from booking.models import Booking, Ticket
 from schedule.models import Performance
 

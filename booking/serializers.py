@@ -1,8 +1,10 @@
 from typing import Any, Dict, Optional
+
+from django.utils import timezone
 from rest_framework import serializers
+
 from booking.models import Booking, Ticket
 from schedule.models import Performance
-from django.utils import timezone
 
 
 class TicketSerializer(serializers.ModelSerializer):

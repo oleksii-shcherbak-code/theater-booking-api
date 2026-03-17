@@ -1,8 +1,10 @@
 from datetime import datetime
-from rest_framework import serializers
-from schedule.models import Performance, TheatreHall
-from plays.models import Play
+
 from django.utils import timezone
+from rest_framework import serializers
+
+from plays.models import Play
+from schedule.models import Performance, TheatreHall
 
 
 class TheatreHallSerializer(serializers.ModelSerializer):

@@ -1,5 +1,7 @@
 from typing import Any, Dict
+
 from rest_framework import serializers
+
 from plays.models import Actor, Genre, Play
 
 
